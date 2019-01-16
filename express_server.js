@@ -58,6 +58,12 @@ app.get("/urls/:id", (req, res) => {
     res.render("urls_show", templateVars);
 });
 
+//deletes an existing short url
+app.post("/urls/:id/delete", (req, res) => {
+    delete urlDatabase[req.params.id];
+    res.redirect('/urls');
+});
+
 //ensures short url brings you to corresponding long url
 app.get("/u/:shortURL", (req, res) => {
     let longURL = urlDatabase[req.params.shortURL]
