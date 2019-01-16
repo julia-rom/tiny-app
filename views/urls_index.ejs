@@ -13,16 +13,18 @@
         <% for (let url in urls) { %>
         <li>
             <% let deleteAction = `/urls/${url}/delete` %>
-            <!-- <% let editpath = `urls/${url}` %> -->
+            <% let editPath = `/urls/${url}` %>
 
-            <%= `Long url: ${urls[url]} => Short url: ${url}`%>
-            <!-- <form method="POST" action=<%=deleteAction %> ><button type="delete">Delete</button></form> -->
-            <button type="delete">Delete<form method="POST" action=<%=deleteAction %> ></form></button>
-            <!-- <form method="POST" action="deleteAction"> -->
+            <form method="POST" action=<%=deleteAction %> >
+                <%= `Long url: ${urls[url]} => Short url: ${url}`%>
+                <a href=<%=editPath %>>Edit</a>
+                <button type="Delete">Delete</button>
+            </form>
+
         </li>
         <% } %>
     </ul>
-    <a href="#">Shorten new url</a>
+    <a href="/urls/new">Shorten new url</a>
 </body>
 
 </html>

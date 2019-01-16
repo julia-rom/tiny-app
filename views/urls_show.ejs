@@ -10,7 +10,14 @@
         <% include ./partials/_header %>
     </header>
     <p>
-        <%= `Long url: ${longURL} => Short url: ${shortURL}`%>
+        <% let editPath = `/urls/${shortURL}` %>
+        <%= `Short URL: ${shortURL}`%>
+        <p>
+            <form method="POST" action=<%=editPath %>>
+                <input type="text" name="longURL" value=<%=`${longURL}`%>>
+                <button type="submit">Update</button>
+            </form>
+        </p>
     </p>
 </body>
 
