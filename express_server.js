@@ -61,14 +61,18 @@ app.post("/urls", (req, res) => {
 
 //brings you to main page where you generate a short url
 app.get("/urls/new", (req, res) => {
-    res.render("urls_new");
+    let templateVars = {
+        username: req.cookies["username"],
+    };
+    res.render("urls_new", templateVars);
 });
 
 //brings you to unique ID page: shows long url & short url versions
 app.get("/urls/:id", (req, res) => {
     let templateVars = {
         shortURL: req.params.id,
-        longURL: urlDatabase[req.params.id]
+        longURL: urlDatabase[req.params.id],
+        username: req.cookies["username"],
     };
     res.render("urls_show", templateVars);
 });
