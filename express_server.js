@@ -3,6 +3,8 @@ var cookieParser = require('cookie-parser')
 var app = express();
 var PORT = 8080; // default port 8080
 
+app.set("view engine", "ejs");
+
 function generateRandomString() {
     var randomString = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -13,14 +15,11 @@ function generateRandomString() {
     return randomString;
 }
 
-app.set("view engine", "ejs");
-
 // JSON body parser as variable
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //add cookie parser as variable
-var app = express()
 app.use(cookieParser())
 
 var urlDatabase = {
@@ -37,9 +36,19 @@ app.get("/urls.json", (req, res) => {
     res.json(urlDatabase);
 });
 
+//handles username form submission and posts to /login from header
+app.post("/login", (req, res) => {
+    let value = req.body.username;
+    res.cookie("username", value)
+    res.redirect('/urls');
+});
+
 //shows full database
 app.get("/urls", (req, res) => {
-    let templateVars = { urls: urlDatabase };
+    let templateVars = {
+        urls: urlDatabase,
+        username: req.cookies["username"],
+    };
     res.render("urls_index", templateVars);
 });
 
