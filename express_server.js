@@ -43,6 +43,12 @@ app.post("/login", (req, res) => {
     res.redirect('/urls');
 });
 
+//clears username cookie after logout
+app.post("/logout", (req, res) => {
+    res.clearCookie("username")
+    res.redirect('/urls');
+});
+
 //shows full database
 app.get("/urls", (req, res) => {
     let templateVars = {
