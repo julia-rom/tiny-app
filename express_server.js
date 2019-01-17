@@ -56,25 +56,34 @@ app.get("/login", (req, res) => {
     res.render('login');
 });
 
+function findUser(email) {
+    for (var user in users) {
+        if (email === users[user].email) {
+            return users[user];
+        }
+    }
+    return null;
+}
+
 //handles username form submission and posts to /login from header
 app.post("/login", (req, res) => {
     //checks if login email matches user from database
-    for (var user in users) {
-        if (req.body.email !== users[user].email) {
-            console.log(req.body.email);
-            console.log(users[user].email);
-            res.status(403).send('Email cannot be found');
-        }
-        //checks is email and password matchs database
-        else if (req.body.email === users[user].email && req.body.password !== users[user].password) {
-            res.status(403).send('Bad email & password login');
-        }
-        else {
-            res.cookie("user_id", value)
+    let foundUser = findUser(req.body.email)
+    if (foundUser) {
+        if (foundUser.password === req.body.password) {
+            res.cookie("user_id", user)
             res.redirect('/');
         }
+        else {
+            res.status(403).send('Bad email & password login');
+        }
+    }
+    else {
+        res.status(403).send('Email cannot be found');
+
     }
 });
+
 
 //clears username cookie after logout
 app.post("/logout", (req, res) => {
