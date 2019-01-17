@@ -9,16 +9,22 @@
     <header>
         <% include ./partials/_header %>
     </header>
+    <% if (username) { %>
     <p>
+        <!-- Dislay short URL -->
         <% let editPath = `/urls/${shortURL}` %>
         <%= `Short URL: ${shortURL}`%>
         <p>
+            <!-- show long url and an update button -->
             <form method="POST" action=<%=editPath %>>
                 <input type="text" name="longURL" value=<%=`${longURL}`%>>
                 <button type="submit">Update</button>
             </form>
         </p>
     </p>
+    <% } else { %>
+    Please <a href="/login">login</a> to view this page.
+    <% } %>
 </body>
 
 </html>

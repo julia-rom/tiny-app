@@ -145,6 +145,7 @@ app.post("/urls", (req, res) => {
 });
 
 //brings you to main page where you generate a short url
+
 app.get("/urls/new", (req, res) => {
     let templateVars = {
         username: req.cookies["user_id"],
@@ -164,9 +165,10 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
     let templateVars = {
         shortURL: req.params.id,
-        longURL: urlDatabase[req.cookies.user_id][req.params.id],
+        longURL: req.cookies["user_id"] && urlDatabase[req.cookies.user_id][req.params.id],
         username: req.cookies["user_id"],
     };
+
     res.render("urls_show", templateVars);
 });
 
