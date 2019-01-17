@@ -38,8 +38,14 @@ let users = {
 }
 
 var urlDatabase = {
-    "b2xVn2": "http://www.lighthouselabs.ca",
-    "9sm5xK": "http://www.google.com"
+    userRandomID: {
+        "b2xVn2": "http://www.lighthouselabs.ca",
+        "9sm5xK": "http://www.google.com"
+    },
+    user2RandomID: {
+        "g9KVn2": "http://www.format.com",
+        "MNB5xK": "http://www.reddit.com"
+    }
 };
 
 
@@ -71,7 +77,7 @@ app.post("/login", (req, res) => {
     let foundUser = findUser(req.body.email)
     if (foundUser) {
         if (foundUser.password === req.body.password) {
-            res.cookie("user_id", user)
+            res.cookie("user_id", foundUser.id)
             res.redirect('/');
         }
         else {
@@ -125,7 +131,7 @@ app.post("/register", (req, res) => {
 //shows full database
 app.get("/urls", (req, res) => {
     let templateVars = {
-        urls: urlDatabase,
+        urls: urlDatabase[req.cookies.user_id],
         username: req.cookies["user_id"],
     };
     res.render("urls_index", templateVars);
@@ -134,7 +140,7 @@ app.get("/urls", (req, res) => {
 //generates short link ID and redirects to urls/randomID
 app.post("/urls", (req, res) => {
     let randomID = generateRandomString();
-    urlDatabase[randomID] = req.body.longURL;
+    urlDatabase[req.cookies.user_id][randomID] = req.body.longURL;
     res.redirect('/urls/' + randomID);
 });
 
