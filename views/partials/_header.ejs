@@ -1,13 +1,11 @@
 <h1>Tiny App Nav</h1>
 
-<% if (username) { %>
+<% if (user_id) { %>
 <form method="POST" action="/logout">
-    <%= `Hello ${username}`%>
+    <%= `Hello ${user_id}`%>
     <button type="logout">Log Out</button>
 </form>
 <% } else { %>
-<form method="POST" action="/login">
-    <input type="text" name="username" value="Enter username">
-    <button type="submit">Submit</button>
-</form>
+<a href="/login">Login</a>
+<a href="/register">Register</a>
 <% } %>
