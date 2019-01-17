@@ -33,7 +33,7 @@ let users = {
     "user2RandomID": {
         id: "user2RandomID",
         email: "hey@whatever.com",
-        password: "dishwasher-funk"
+        password: "password"
     }
 }
 
@@ -164,7 +164,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
     let templateVars = {
         shortURL: req.params.id,
-        longURL: urlDatabase[req.params.id],
+        longURL: urlDatabase[req.cookies.user_id][req.params.id],
         username: req.cookies["user_id"],
     };
     res.render("urls_show", templateVars);
@@ -172,13 +172,13 @@ app.get("/urls/:id", (req, res) => {
 
 //deletes an existing short url
 app.post("/urls/:id/delete", (req, res) => {
-    delete urlDatabase[req.params.id];
+    delete urlDatabase[req.cookies.user_id][req.params.id];
     res.redirect('/urls');
 });
 
 //lets you edit existing long url
 app.post("/urls/:id/", (req, res) => {
-    urlDatabase[req.params.id] = req.body.longURL;
+    urlDatabase[req.cookies.user_id][req.params.id] = req.body.longURL;
     res.redirect('/urls');
 });
 
