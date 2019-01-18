@@ -46,17 +46,6 @@ let users = {
     }
 }
 
-// var urlDatabase = {
-//     userRandomID: {
-//         "b2xVn2": "http://www.lighthouselabs.ca",
-//         "9sm5xK": "http://www.google.com"
-//     },
-//     user2RandomID: {
-//         "g9KVn2": "http://www.format.com",
-//         "MNB5xK": "http://www.reddit.com"
-//     }
-// };
-
 var urlDatabase = {
     "b2xVn2": {
         longURL: "http://www.lighthouselabs.ca",
@@ -105,7 +94,6 @@ app.post("/login", (req, res) => {
     let foundUser = findUser(req.body.email)
     if (foundUser) {
         if (bcrypt.compareSync(foundUser.password, hashPass)) {
-            // res.cookie("user_id", foundUser.id)
             req.session.user_id;
             res.redirect('/');
         }
