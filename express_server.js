@@ -6,6 +6,19 @@ const PORT = 8080;
 
 app.set("view engine", "ejs");
 
+// JSON body parser as variable
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: true }));
+
+//cookie session encryption
+app.use(cookieSession({
+    name: 'session',
+    keys: ["thisIsMySecretKeyMeowMeow"],
+
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
+
 function generateRandomString() {
     var randomString = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -16,19 +29,9 @@ function generateRandomString() {
     return randomString;
 }
 
-// JSON body parser as variable
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
-
-app.use(cookieSession({
-    name: 'session',
-    keys: ["thisIsMySecretKeyMeowMeow"],
-
-    // Cookie Options
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
-
 //user database
+//since they are hard coded in, they do not have a hashed password. In other words,
+// it won't work to log in with these
 let users = {
     "userRandomID": {
         id: "userRandomID",
@@ -120,10 +123,7 @@ app.post("/register", (req, res) => {
     }
     //check if email isn't already in use
     else {
-        console.log(req.body)
-        console.log(users)
         for (var user in users) {
-            console.log(user)
             if (users[user].email === req.body.email) {
                 res.status(400).send('Email is taken, sorry!');
             }
@@ -166,13 +166,13 @@ app.get("/urls", (req, res) => {
 //brings you to main page where you generate a short url
 
 app.get("/urls/new", (req, res) => {
-    let templateVars = {
-        username: req.session.user_id,
-        email: users[req.session.user_id].email
-    };
     let loggedIn = req.session.user_id;
     //checks if user is logged in
     if (loggedIn) {
+        let templateVars = {
+            username: req.session.user_id,
+            email: users[req.session.user_id].email
+        };
         //displays url shortener if logged in
         res.render("urls_new", templateVars);
     }
@@ -222,8 +222,12 @@ app.post("/urls/:id/", (req, res) => {
 
 //ensures short url brings you to corresponding long url whether you're logged in or not
 app.get("/u/:shortURL", (req, res) => {
-    let longURL = urlDatabase[req.params.shortURL]["longURL"];
-    res.redirect(longURL);
+    if (urlDatabase[req.params.shortURL]) {
+        let longURL = urlDatabase[req.params.shortURL]["longURL"];
+    }
+    else {
+        res.status(400).send('Sorry, the short url you are trying to reach does not exist!');
+    }
 });
 
 

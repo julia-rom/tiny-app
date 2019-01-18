@@ -14,7 +14,7 @@
         <li>
             <% let deleteAction = `/urls/${url}/delete` %>
             <% let editPath = `/urls/${url}` %>
-
+            <!-- Display saved urls with option to edit and delete each one -->
             <form method="POST" action=<%=deleteAction %> >
                 <%= `Long url: ${urls[url]} => Short url: ${url}`%>
                 <a href=<%=editPath %>>Edit</a>
