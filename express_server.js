@@ -1,5 +1,4 @@
 const express = require("express");
-// const cookieParser = require('cookie-parser')
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const app = express();
@@ -21,12 +20,9 @@ function generateRandomString() {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//add cookie parser as variable
-// app.use(cookieParser())
-
 app.use(cookieSession({
     name: 'session',
-    keys: ["thisIsMySecretKey"],
+    keys: ["thisIsMySecretKeyMeowMeow"],
 
     // Cookie Options
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -68,10 +64,6 @@ var urlDatabase = {
 
 app.get("/", (req, res) => {
     res.send("Hello!");
-});
-
-app.get("/urls.json", (req, res) => {
-    res.json(urlDatabase);
 });
 
 //direct to login page
@@ -152,16 +144,17 @@ app.post("/register", (req, res) => {
 //shows full database
 app.get("/urls", (req, res) => {
     let urlList = {}
-    let loggedIn = req.session.user_id
-    if (loggedIn) {
+    let userID = req.session.user_id
+    if (userID) {
         for (var url in urlDatabase) {
-            if (urlDatabase[url]["userID"] === req.session.user_id) {
+            if (urlDatabase[url]["userID"] === userID) {
                 urlList[url] = urlDatabase[url]["longURL"];
             };
         }
         let templateVars = {
             urls: urlList,
-            username: req.session.user_id
+            username: userID,
+            email: users[userID].email
         };
         res.render("urls_index", templateVars);
     }
@@ -175,6 +168,7 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
     let templateVars = {
         username: req.session.user_id,
+        email: users[req.session.user_id].email
     };
     let loggedIn = req.session.user_id;
     //checks if user is logged in
@@ -192,18 +186,20 @@ app.post("/urls/new", (req, res) => {
     let randomID = generateRandomString();
     urlDatabase[randomID] = {
         longURL: req.body.longURL,
-        userID: req.session.user_id
+        userID: req.session.user_id,
+        email: users[req.session.user_id].email
     }
     res.redirect('/urls/' + randomID);
 });
 
 //brings you to unique ID page: shows long url & short url versions
 app.get("/urls/:id", (req, res) => {
-    if (req.cookies.user_id in users) {
+    if (req.session.user_id) {
         let templateVars = {
             shortURL: req.params.id,
             longURL: req.session.user_id && urlDatabase[req.params.id]["longURL"],
-            username: req.session.user_id
+            username: req.session.user_id,
+            email: users[req.session.user_id].email
         };
         res.render("urls_show", templateVars);
     }

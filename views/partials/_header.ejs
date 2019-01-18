@@ -1,8 +1,8 @@
 <h1>Tiny App Nav</h1>
 
-<% if (username) { %>
+<% if (locals.email) { %>
 <form method="POST" action="/logout">
-    <%= `Hello ${username}`%>
+    <%= `Hello ${email}`%>
     <button type="logout">Log Out</button>
 </form>
 <% } else { %>
