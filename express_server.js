@@ -37,15 +37,34 @@ let users = {
     }
 }
 
+// var urlDatabase = {
+//     userRandomID: {
+//         "b2xVn2": "http://www.lighthouselabs.ca",
+//         "9sm5xK": "http://www.google.com"
+//     },
+//     user2RandomID: {
+//         "g9KVn2": "http://www.format.com",
+//         "MNB5xK": "http://www.reddit.com"
+//     }
+// };
+
 var urlDatabase = {
-    userRandomID: {
-        "b2xVn2": "http://www.lighthouselabs.ca",
-        "9sm5xK": "http://www.google.com"
+    "b2xVn2": {
+        longURL: "http://www.lighthouselabs.ca",
+        userID: "userRandomID"
     },
-    user2RandomID: {
-        "g9KVn2": "http://www.format.com",
-        "MNB5xK": "http://www.reddit.com"
-    }
+    "9sm5xK": {
+        longURL: "http://www.google.com",
+        userID: "userRandomID"
+    },
+    "g9KVn2": {
+        longURL: "http://www.format.com",
+        userID: "user2RandomID"
+    },
+    "MNB5xK": {
+        longURL: "http://www.reddit.com",
+        userID: "user2RandomID"
+    },
 };
 
 
@@ -130,18 +149,23 @@ app.post("/register", (req, res) => {
 
 //shows full database
 app.get("/urls", (req, res) => {
-    let templateVars = {
-        urls: urlDatabase[req.cookies.user_id],
-        username: req.cookies["user_id"],
-    };
-    res.render("urls_index", templateVars);
-});
-
-//generates short link ID and redirects to urls/randomID
-app.post("/urls", (req, res) => {
-    let randomID = generateRandomString();
-    urlDatabase[req.cookies.user_id][randomID] = req.body.longURL;
-    res.redirect('/urls/' + randomID);
+    let urlList = {}
+    let loggedIn = req.cookies["user_id"];
+    if (loggedIn) {
+        for (var url in urlDatabase) {
+            if (urlDatabase[url]["userID"] === req.cookies["user_id"]) {
+                urlList[url] = urlDatabase[url]["longURL"];
+            };
+        }
+        let templateVars = {
+            urls: urlList,
+            username: req.cookies["user_id"],
+        };
+        res.render("urls_index", templateVars);
+    }
+    else {
+        res.redirect("/login");
+    }
 });
 
 //brings you to main page where you generate a short url
@@ -161,32 +185,46 @@ app.get("/urls/new", (req, res) => {
     }
 });
 
+//generates short link ID and redirects to urls/randomID
+app.post("/urls/new", (req, res) => {
+    let randomID = generateRandomString();
+    urlDatabase[randomID] = {
+        longURL: req.body.longURL,
+        userID: req.cookies.user_id
+    }
+    res.redirect('/urls/' + randomID);
+});
+
 //brings you to unique ID page: shows long url & short url versions
 app.get("/urls/:id", (req, res) => {
-    let templateVars = {
-        shortURL: req.params.id,
-        longURL: req.cookies["user_id"] && urlDatabase[req.cookies.user_id][req.params.id],
-        username: req.cookies["user_id"],
-    };
-
-    res.render("urls_show", templateVars);
+    if (req.cookies.user_id in users) {
+        let templateVars = {
+            shortURL: req.params.id,
+            longURL: req.cookies["user_id"] && urlDatabase[req.params.id]["longURL"],
+            username: req.cookies["user_id"]
+        };
+        res.render("urls_show", templateVars);
+    }
+    else {
+        res.redirect('/login');
+    }
 });
 
 //deletes an existing short url
 app.post("/urls/:id/delete", (req, res) => {
-    delete urlDatabase[req.cookies.user_id][req.params.id];
+    delete urlDatabase[req.params.id];
     res.redirect('/urls');
 });
 
 //lets you edit existing long url
 app.post("/urls/:id/", (req, res) => {
-    urlDatabase[req.cookies.user_id][req.params.id] = req.body.longURL;
+    urlDatabase[req.params.id]["longURL"] = req.body.longURL;
     res.redirect('/urls');
 });
 
-//ensures short url brings you to corresponding long url
+//ensures short url brings you to corresponding long url whether you're logged in or not
 app.get("/u/:shortURL", (req, res) => {
-    let longURL = urlDatabase[req.params.shortURL]
+    let longURL = urlDatabase[req.params.shortURL]["longURL"];
     res.redirect(longURL);
 });
 

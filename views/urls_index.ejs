@@ -10,7 +10,7 @@
         <% include ./partials/_header %>
     </header>
     <ul>
-        <% for (let url in urls) { %>
+        <% for (var url in urls) { %>
         <li>
             <% let deleteAction = `/urls/${url}/delete` %>
             <% let editPath = `/urls/${url}` %>
