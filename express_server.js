@@ -115,145 +115,152 @@ app.get("/register", (req, res) => {
     res.render('register_page');
 });
 
-//Validate password and email function name(params) 
+//Checks if password and email are not empty
 function validatePasswordEmailNotEmpty(email, password) {
     if (!email || !password) {
-
-
-
-
+        return {
+            status: "error",
+            message: "Email or password field is empty."
+        }
+    }
+    else {
+        return {
+            status: "ok"
+        }
     }
 }
 
+//Ensures new email is not taken
 function validateEmailNotTaken(email, users) {
     for (var user in users) {
         if (users[user].email === email) {
-
+            return {
+                status: "error",
+                message: "Email is taken, sorry!"
+            }
         }
     }
+    return {
+        status: "ok"
+    }
+}
 
+//registers new users & handles reg errors
+app.post("/register", (req, res) => {
+    const randomUserID = generateRandomString();
+    const notEmpty = validatePasswordEmailNotEmpty(req.body.email, req.body.password);
+    const notTaken = validateEmailNotTaken(req.body.email, users);
+    const password = req.body.password;
 
-    //save registration page login and add to user database & handle reg errors
-    app.post("/register", (req, res) => {
-
-        //check if email and password inputs are empty
-        if (req.body.email === "" || req.body.password === "") {
-            console.log("email or password empty");
-            res.status(400).send('Email or password field is empty.');
-        }
-        //check if email isn't already in use
-        else {
-            console.log("email and password not empty");
-            for (var user in users) {
-                if (users[user].email === req.body.email) {
-                    res.status(400).send('Email is taken, sorry!');
-                }
-            }
-        }
-
-        // let randomUserID = generateRandomString();
-        // let password = req.body.password
-        // users[randomUserID] = {
-        //     id: randomUserID,
-        //     email: req.body.email,
-        //     hashPass: bcrypt.hashSync(password, 10)
-        // };
+    if (notEmpty["status"] === "error") {
+        res.status(400).send(notEmpty["message"]);
+    }
+    else if (notTaken["status"] === "error") {
+        res.status(400).send(notTaken["message"]);
+    }
+    else {
+        users[randomUserID] = {
+            id: randomUserID,
+            email: req.body.email,
+            hashPass: bcrypt.hashSync(password, 10)
+        };
         req.session.user_id = randomUserID;
         res.redirect('/urls');
-    });
+    }
+});
 
-    //shows full database
-    app.get("/urls", (req, res) => {
-        let urlList = {}
-        let userID = req.session.user_id
-        if (userID) {
-            for (var url in urlDatabase) {
-                if (urlDatabase[url]["userID"] === userID) {
-                    urlList[url] = urlDatabase[url]["longURL"];
-                };
-            }
-            let templateVars = {
-                urls: urlList,
-                username: userID,
-                email: users[userID].email
+//shows full database
+app.get("/urls", (req, res) => {
+    let urlList = {}
+    let userID = req.session.user_id
+    if (userID) {
+        for (var url in urlDatabase) {
+            if (urlDatabase[url]["userID"] === userID) {
+                urlList[url] = urlDatabase[url]["longURL"];
             };
-            res.render("urls_index", templateVars);
         }
-        else {
-            res.redirect("/login");
-        }
-    });
+        let templateVars = {
+            urls: urlList,
+            username: userID,
+            email: users[userID].email
+        };
+        res.render("urls_index", templateVars);
+    }
+    else {
+        res.redirect("/login");
+    }
+});
 
-    //brings you to main page where you generate a short url
+//brings you to main page where you generate a short url
 
-    app.get("/urls/new", (req, res) => {
-        let loggedIn = req.session.user_id;
-        //checks if user is logged in
-        if (loggedIn) {
-            let templateVars = {
-                username: req.session.user_id,
-                email: users[req.session.user_id].email
-            };
-            //displays url shortener if logged in
-            res.render("urls_new", templateVars);
-        }
-        else {
-            res.redirect("/login")
-        }
-    });
-
-    //generates short link ID and redirects to urls/randomID
-    app.post("/urls/new", (req, res) => {
-        let randomID = generateRandomString();
-        urlDatabase[randomID] = {
-            longURL: req.body.longURL,
-            userID: req.session.user_id,
+app.get("/urls/new", (req, res) => {
+    let loggedIn = req.session.user_id;
+    //checks if user is logged in
+    if (loggedIn) {
+        let templateVars = {
+            username: req.session.user_id,
             email: users[req.session.user_id].email
-        }
-        res.redirect('/urls/' + randomID);
-    });
+        };
+        //displays url shortener if logged in
+        res.render("urls_new", templateVars);
+    }
+    else {
+        res.redirect("/login")
+    }
+});
 
-    //brings you to unique ID page: shows long url & short url versions
-    app.get("/urls/:id", (req, res) => {
-        if (req.session.user_id) {
-            let templateVars = {
-                shortURL: req.params.id,
-                longURL: req.session.user_id && urlDatabase[req.params.id]["longURL"],
-                username: req.session.user_id,
-                email: users[req.session.user_id].email
-            };
-            res.render("urls_show", templateVars);
-        }
-        else {
-            res.redirect('/login');
-        }
-    });
+//generates short link ID and redirects to urls/randomID
+app.post("/urls/new", (req, res) => {
+    let randomID = generateRandomString();
+    urlDatabase[randomID] = {
+        longURL: req.body.longURL,
+        userID: req.session.user_id,
+        email: users[req.session.user_id].email
+    }
+    res.redirect('/urls/' + randomID);
+});
 
-    //deletes an existing short url
-    app.post("/urls/:id/delete", (req, res) => {
-        delete urlDatabase[req.params.id];
-        res.redirect('/urls');
-    });
+//brings you to unique ID page: shows long url & short url versions
+app.get("/urls/:id", (req, res) => {
+    if (req.session.user_id) {
+        let templateVars = {
+            shortURL: req.params.id,
+            longURL: req.session.user_id && urlDatabase[req.params.id]["longURL"],
+            username: req.session.user_id,
+            email: users[req.session.user_id].email
+        };
+        res.render("urls_show", templateVars);
+    }
+    else {
+        res.redirect('/login');
+    }
+});
 
-    //lets you edit existing long url
-    app.post("/urls/:id/", (req, res) => {
-        urlDatabase[req.params.id]["longURL"] = req.body.longURL;
-        res.redirect('/urls');
-    });
+//deletes an existing short url
+app.post("/urls/:id/delete", (req, res) => {
+    delete urlDatabase[req.params.id];
+    res.redirect('/urls');
+});
 
-    //ensures short url brings you to corresponding long url whether you're logged in or not
-    app.get("/u/:shortURL", (req, res) => {
-        console.log("Short url: ", req.params.shortURL)
-        if (urlDatabase[req.params.shortURL]) {
-            let longURL = urlDatabase[req.params.shortURL]["longURL"];
-            res.redirect(longURL);
-        }
-        else {
-            res.status(400).send('Sorry, the short url you are trying to reach does not exist!');
-        }
-    });
+//lets you edit existing long url
+app.post("/urls/:id/", (req, res) => {
+    urlDatabase[req.params.id]["longURL"] = req.body.longURL;
+    res.redirect('/urls');
+});
+
+//ensures short url brings you to corresponding long url whether you're logged in or not
+app.get("/u/:shortURL", (req, res) => {
+    console.log("Short url: ", req.params.shortURL)
+    if (urlDatabase[req.params.shortURL]) {
+        let longURL = urlDatabase[req.params.shortURL]["longURL"];
+        res.redirect(longURL);
+    }
+    else {
+        res.status(400).send('Sorry, the short url you are trying to reach does not exist!');
+    }
+});
 
 
-    app.listen(PORT, () => {
-        console.log(`Example app listening on port ${PORT}!`);
-    });
+app.listen(PORT, () => {
+    console.log(`Example app listening on port ${PORT}!`);
+});
