@@ -2,8 +2,7 @@
 Tiny app us a full stack web application built with Node and Express that allows users to shorten long URLS (à la bit.ly)
 
 ## Final Product
-Due to the time constraints of this project, no CSS styling was added. This is the raw package. Pure functionality baby!
-
+Due to the time constraints of this project, no CSS styling was added. This is the raw package.
 
 !["Screenshot of new URL page"](https://github.com/julia-rom/tiny-app/blob/master/docs/enter-new-url.png)
 !["Screenshot of main urls page"](https://github.com/julia-rom/tiny-app/blob/master/docs/urls-page.png)
