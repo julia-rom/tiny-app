@@ -88,11 +88,8 @@ app.post("/login", (req, res) => {
     //checks if login email matches user from database
     let foundUser = findUser(req.body.email)
     if (foundUser) {
-        // if (bcrypt.compareSync(foundUser.password, hashPass)) {
-        if (bcrypt.compareSync(foundUser.hashPass, req.body.password)) {
-            //cookie doesn't seem to be setting after login
-            // req.session.user_id;
-            req.session.user_id = foundUser[user].id;
+        if (bcrypt.compareSync(req.body.password, foundUser.hashPass)) {
+            req.session.user_id = foundUser.id;
             res.redirect('/urls');
         }
         else {
