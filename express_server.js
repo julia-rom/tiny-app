@@ -31,17 +31,17 @@ function generateRandomString() {
 
 //user database
 //since they are hard coded in, they do not have a hashed password. In other words,
-// it won't work to log in with these
+//the passwords below are just for testing a hardcoded login example
 let users = {
     "userRandomID": {
         id: "userRandomID",
         email: "code@lh.com",
-        // password: "purple-monkey-dinosaur"
+        hashPass: bcrypt.hashSync("purple-monkey-dinosaur", 10)
     },
     "user2RandomID": {
         id: "user2RandomID",
         email: "hey@whatever.com",
-        // password: "password"
+        hashPass: bcrypt.hashSync("password", 10)
     }
 }
 
@@ -88,9 +88,12 @@ app.post("/login", (req, res) => {
     //checks if login email matches user from database
     let foundUser = findUser(req.body.email)
     if (foundUser) {
-        if (bcrypt.compareSync(foundUser.password, hashPass)) {
-            req.session.user_id;
-            res.redirect('/');
+        // if (bcrypt.compareSync(foundUser.password, hashPass)) {
+        if (bcrypt.compareSync(foundUser.hashPass, req.body.password)) {
+            //cookie doesn't seem to be setting after login
+            // req.session.user_id;
+            req.session.user_id = foundUser[user].id;
+            res.redirect('/urls');
         }
         else {
             res.status(403).send('Bad email & password login');
@@ -107,7 +110,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
     // res.clearCookie("user_id")
     delete req.session.user_id;
-    res.redirect('/urls');
+    res.redirect('/login');
 });
 
 //returns registration page
